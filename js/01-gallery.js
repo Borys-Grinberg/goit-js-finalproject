@@ -1,9 +1,8 @@
 import { galleryItems } from "./gallery-items.js";
-// Отримуємо контейнер ul.gallery
+
 const galleryContainer = document.querySelector(".gallery");
 let lightboxInstance = null;
 
-// Функція для створення рядка HTML за шаблоном
 function createGalleryItemHTML(item) {
   return `
     <li class="gallery__item">
@@ -19,54 +18,49 @@ function createGalleryItemHTML(item) {
   `;
 }
 
-// Функція для відкриття модального вікна
 function openModal(imageURL) {
   lightboxInstance = basicLightbox.create(
-    `<img src="${imageURL}" alt="Image description">`
+    `<img src="${imageURL}" alt="Image description">`,
+    {
+      onShow: () => {
+        // Додаємо обробник події для закриття модального вікна по натисканню клавіші Escape
+        document.addEventListener("keydown", closeOnEscape);
+      },
+      onClose: () => {
+        // Видаляємо обробник події для закриття по Escape
+        document.removeEventListener("keydown", closeOnEscape);
+      },
+    }
   );
-  lightboxInstance.show();
 
-  // Додаємо обробник події для закриття модального вікна по натисканню клавіші Escape
-  document.addEventListener("keydown", closeOnEscape);
+  lightboxInstance.show();
 }
 
-// Функція для закриття модального вікна
 function closeModal() {
   if (lightboxInstance) {
     lightboxInstance.close();
     lightboxInstance = null;
-
-    // Видаляємо обробник події для закриття по Escape
-    document.removeEventListener("keydown", closeOnEscape);
   }
 }
 
-// Функція для закриття модального вікна по клавіші Escape
 function closeOnEscape(event) {
   if (event.key === "Escape") {
     closeModal();
   }
 }
 
-// Додаємо обробник події на контейнер ul.gallery для делегування
 galleryContainer.addEventListener("click", (e) => {
-  e.preventDefault(); // Забороняємо перенаправлення за замовчуванням
+  e.preventDefault();
 
-  // Перевіряємо, чи клікнули на зображення
   if (e.target.classList.contains("gallery__image")) {
-    // Отримуємо URL великого зображення з атрибуту data-source
     const largeImageURL = e.target.dataset.source;
-
-    // Відкриваємо модальне вікно
     openModal(largeImageURL);
   }
 });
 
-// Викликаємо функцію рендерингу галереї
 function renderGallery(galleryItems) {
   const galleryItemsHTML = galleryItems.map(createGalleryItemHTML).join("");
   galleryContainer.insertAdjacentHTML("beforeend", galleryItemsHTML);
 }
 
-// Викликаємо функцію рендерингу галереї
 renderGallery(galleryItems);
